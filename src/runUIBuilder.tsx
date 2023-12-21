@@ -1,5 +1,6 @@
 import {
   FieldType,
+  IRecord,
   IWidgetField,
   IWidgetTable,
   UIBuilder,
@@ -56,18 +57,27 @@ export default async function main(
         for (let i = 0; i < records.length; i += 5000) {
           // 每次处理最多 5000 条记录
           const recordsToUpdate = records.slice(i, i + 5000).map((record) => {
+            // 检查 recordId 和 record.value 的有效性
+  if (!record.record_id || !Array.isArray(record.value)) {
+    return null;
+  }
             // 修改记录中每个元素的text部分
             const newValues = record.value.map((item) => {
-              let newItem = { ...item }; // 复制元素以避免直接修改原始数据
-              if ("text" in newItem) {
-                const originalText = newItem.text;
-                const formattedText = formatText(
-                  originalText,
-                  formattingMethod
-                );
-                newItem.text = formattedText;
+              if (typeof item === "object" && item !== null) {
+                let newItem = { ...item }; // 复制元素以避免直接修改原始数据
+                if ("text" in newItem) {
+                  const originalText = newItem.text;
+                  const formattedText = formatText(
+                    originalText,
+                    formattingMethod
+                  );
+                  newItem.text = formattedText;
+                }
+                return newItem;
+              } else {
+                // 如果 item 不是对象，直接返回原始值
+                return item;
               }
-              return newItem;
             });
 
             return {
@@ -76,7 +86,7 @@ export default async function main(
                 [field.id]: newValues,
               },
             };
-          });
+          }).filter(update => update !== null) as IRecord[]; // 过滤掉 null 并断言为 IRecord[]
 
           // 使用 setRecords 方法批量更新该字段的一批记录
           if (recordsToUpdate.length > 0) {
@@ -92,7 +102,7 @@ export default async function main(
   );
 }
 
-function formatText(text, method) {
+function formatText(text: string | null, method: string) {
   // 确保 text 是字符串类型，同时处理 null 和 undefined
   if (typeof text !== "string" || text == null) {
     text = String(text || "");
