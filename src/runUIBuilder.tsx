@@ -110,6 +110,10 @@ function formatText(text: string, method: string): string {
 
   if (method === "all" || method === "punctuation") {
     const isChinese = isMainlyChinese(text);
+
+    let inQuote = false; // 跟踪双引号的开闭状态
+    let inSingleQuote = false; // 跟踪单引号的开闭状态
+
     if (isChinese) {
       // 英文标点转中文标点
       formattedText = formattedText
@@ -124,8 +128,14 @@ function formatText(text: string, method: string): string {
         .replace(/</g, "《")
         .replace(/>/g, "》")
         .replace(/--/g, "——")
-        .replace(/"/g, (match) => (match === '"' ? "“" : "”")) // 英文双引号转中文双引号
-        .replace(/'/g, (match) => (match === "'" ? "‘" : "’")); // 英文单引号转中文单引号
+        .replace(/"/g, () => {
+          inQuote = !inQuote;
+          return inQuote ? "“" : "”";
+        }) // 英文双引号转中文双引号，考虑开闭引号的不同
+        .replace(/'/g, () => {
+          inSingleQuote = !inSingleQuote;
+          return inSingleQuote ? "‘" : "’";
+        }); // 英文单引号转中文单引号，考虑开闭引号的不同
     } else {
       // 中文标点转英文标点
       formattedText = formattedText
@@ -161,70 +171,6 @@ function formatText(text: string, method: string): string {
   }
 
   return formattedText;
-}
-
-function formatText(text: string | null, method: string) {
-  // 确保 text 是字符串类型，同时处理 null 和 undefined
-  if (typeof text !== "string" || text == null) {
-    text = String(text || "");
-  }
-
-  if (method === "space") {
-    // 中英文之间添加空格的规则
-    text = text.replace(/([\u4E00-\u9FA3])([A-Za-z0-9\(\[\{@#])/g, "$1 $2");
-    text = text.replace(
-      /([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA3])/g,
-      "$1 $2"
-    );
-  } else if (method === "punctuation_1") {
-    // 中文标点转英文标点
-    text = text
-      .replace(/，/g, ",")
-      .replace(/。/g, ".")
-      .replace(/！/g, "!")
-      .replace(/？/g, "?")
-      .replace(/：/g, ":")
-      .replace(/；/g, ";")
-      .replace(/‘/g, "'")
-      .replace(/’/g, "'")
-      .replace(/“/g, '"')
-      .replace(/”/g, '"')
-      .replace(/（/g, "(")
-      .replace(/）/g, ")")
-      .replace(/《/g, "<")
-      .replace(/》/g, ">")
-      .replace(/、/g, ",")
-      .replace(/——/g, "--");
-  } else if (method === "punctuation_2") {
-    // 英文标点转中文标点
-    text = text
-      .replace(/,/g, "，")
-      .replace(/\./g, "。")
-      .replace(/!/g, "！")
-      .replace(/\?/g, "？")
-      .replace(/:/g, "：")
-      .replace(/;/g, "；")
-      .replace(/\(/g, "（")
-      .replace(/\)/g, "）")
-      .replace(/</g, "《")
-      .replace(/>/g, "》")
-      .replace(/--/g, "——");
-
-    // 英文双引号转中文双引号，考虑开闭引号的不同
-    let inQuote = false;
-    text = text.replace(/"/g, () => {
-      inQuote = !inQuote;
-      return inQuote ? "“" : "”";
-    });
-    // 英文单引号转中文单引号，考虑开闭引号的不同
-    let inSingleQuote = false;
-    text = text.replace(/'/g, () => {
-      inSingleQuote = !inSingleQuote;
-      return inSingleQuote ? "‘" : "’";
-    });
-  }
-
-  return text;
 }
 
 function isMainlyChinese(text: string): boolean {
