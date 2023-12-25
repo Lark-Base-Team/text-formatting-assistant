@@ -2,7 +2,7 @@ const resources = {
   zh: {
     translation: {
       "text_formatting_title": "文字排版助手",
-      "text_formatting_description": "此插件提供文本字段的格式优化，包括在英文/数字和中文之间添加空格、中文英文标点之间互相转换。",
+      "text_formatting_description": "提供文本字段的格式优化，包括在英文/数字和中文之间添加空格、中文英文标点之间互相转换。",
       "select_data_table": "选择数据表",
       "select_fields_label": "要优化的字段（文本）",
       "formatting_method_label": "优化方式",
@@ -10,6 +10,7 @@ const resources = {
       "space_formatting": "空格格式：在英文/数字和中文之间添加空格",
       "punctuation_formatting_1": "标点符号：中文标点转英文标点",
       "punctuation_formatting_2": "标点符号：英文标点转中文标点",
+      "find_button": "查找",
       "format_button": "一键优化",
       "formatting_completed": "文本优化完成",
       "form_incomplete_error": "表单未填写完整",

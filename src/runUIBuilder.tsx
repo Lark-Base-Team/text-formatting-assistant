@@ -1,8 +1,8 @@
 import {
   FieldType,
-  IRecord,
-  IWidgetField,
-  IWidgetTable,
+  // IRecord,
+  ITable,
+  ITextField,
   UIBuilder,
 } from "@lark-base-open/js-sdk";
 import { UseTranslationResponse } from "react-i18next";
@@ -11,6 +11,7 @@ export default async function main(
   uiBuilder: UIBuilder,
   { t }: UseTranslationResponse<"translation", undefined>
 ) {
+  let recordsToFormat: { recordId: string, fieldId: string }[] = []; // 存储需要格式化的记录ID和字段ID
   uiBuilder.markdown(`## ${t("text_formatting_title")}`);
   uiBuilder.markdown(t("text_formatting_description"));
   uiBuilder.form(
@@ -28,19 +29,25 @@ export default async function main(
         form.select("formattingMethod", {
           label: t("formatting_method_label"),
           options: [
+            { label: t("all_formatting"), value: "all" },
             { label: t("space_formatting"), value: "space" },
-            { label: t("punctuation_formatting_1"), value: "punctuation_1" }, //标点符号（中文标点转英文标点）
-            { label: t("punctuation_formatting_2"), value: "punctuation_2" }, //标点符号（英文标点转中文标点）
+            // { label: t("punctuation_formatting_1"), value: "punctuation_1" }, //标点符号（中文标点转英文标点）
+            // { label: t("punctuation_formatting_2"), value: "punctuation_2" }, //标点符号（英文标点转中文标点）
+            { label: t("punctuation_formatting"), value: "punctuation" }, 
+            //标点符号
+            //对于中文单元格：英文标点转中文标点
+            //对于英文单元格：中文标点转英文标点
           ],
-          defaultValue: "space", // Default selected value
+          defaultValue: "all", // Default selected value
           description: t("formatting_method_description"), // Optional: Add a description or help text
         }),
       ],
-      buttons: [t("format_button")], // Button to submit the form
+      buttons: [t("find_button"), t("format_button")], // Button to submit the form
     }),
-    async ({ values }) => {
-      const table = values.table as IWidgetTable;
-      const fields = values.fields as IWidgetField[];
+    async ({ key, values }) => {
+      // uiBuilder.markdown(`你点击了**${key}**按钮`);
+      const table = values.table as ITable;
+      const fields = values.fields as ITextField[];
       const formattingMethod = values.formattingMethod as string;
 
       // 检查是否所有必填项都已填写
@@ -51,55 +58,104 @@ export default async function main(
 
       uiBuilder.showLoading(t("processing_data"));
 
-      // 针对每个字段进行操作
-      for (let field of fields) {
-        const records = await field.getFieldValueList();
-        for (let i = 0; i < records.length; i += 5000) {
-          // 每次处理最多 5000 条记录
-          const recordsToUpdate = records.slice(i, i + 5000).map((record) => {
-            // 检查 recordId 和 record.value 的有效性
-  if (!record.record_id || !Array.isArray(record.value)) {
-    return null;
-  }
-            // 修改记录中每个元素的text部分
-            const newValues = record.value.map((item) => {
-              if (typeof item === "object" && item !== null) {
-                let newItem = { ...item }; // 复制元素以避免直接修改原始数据
-                if ("text" in newItem) {
-                  const originalText = newItem.text;
-                  const formattedText = formatText(
-                    originalText,
-                    formattingMethod
-                  );
-                  newItem.text = formattedText;
-                }
-                return newItem;
-              } else {
-                // 如果 item 不是对象，直接返回原始值
-                return item;
-              }
-            });
+      if (key === t("find_button")) {
+        recordsToFormat = [];
 
-            return {
-              recordId: record.record_id,
-              fields: {
-                [field.id]: newValues,
-              },
-            };
-          }).filter(update => update !== null) as IRecord[]; // 过滤掉 null 并断言为 IRecord[]
+        const recordIdList = await table.getRecordIdList();
+        for (const recordId of recordIdList) {
+          for (const field of fields) {
+            const fieldValue = await field.getValue(recordId);
 
-          // 使用 setRecords 方法批量更新该字段的一批记录
-          if (recordsToUpdate.length > 0) {
-            const res = await table.setRecords(recordsToUpdate);
-            // console.log(res); // 打印被修改记录的 id 列表
+            // 检查是否需要格式化并添加到数组
+            if (fieldValue && needsFormatting(fieldValue, formattingMethod)) {
+              recordsToFormat.push({ recordId, fieldId: field.id });
+            }
           }
         }
+
+        // 显示需要格式化的记录
+        displayRecordsAsTable(recordsToFormat, uiBuilder);
+      } else if (key === t("format_button")) {
+        let count = 0; // 格式化的单元格数量
+
+        for (const { recordId, fieldId } of recordsToFormat) {
+          // 执行格式化操作...
+          const res = await formatRecord(
+            recordId,
+            fieldId,
+            formattingMethod,
+            table
+          );
+          count += res ? 1 : 0;
+        }
+
+        uiBuilder.message.success(
+          `${t("formatting_completed")} ${count} ${t("cells_formatted")}`
+        );
       }
 
       uiBuilder.hideLoading();
       uiBuilder.message.success(t("formatting_completed"));
     }
   );
+}
+
+
+function formatText(text: string, method: string): string {
+  // 如果 text 为空或不是字符串，则返回原始值
+  if (typeof text !== 'string' || text == null) {
+    return text;
+  }
+
+  let formattedText = text;
+
+  if (method === 'all' || method === 'punctuation') {
+    const isChinese = isMainlyChinese(text);
+    if (isChinese) {
+      // 英文标点转中文标点
+      formattedText = formattedText
+        .replace(/,/g, '，')
+        .replace(/\./g, '。')
+        .replace(/!/g, '！')
+        .replace(/\?/g, '？')
+        .replace(/:/g, '：')
+        .replace(/;/g, '；')
+        .replace(/\(/g, '（')
+        .replace(/\)/g, '）')
+        .replace(/</g, '《')
+        .replace(/>/g, '》')
+        .replace(/--/g, '——')
+        .replace(/"/g, match => match === '"' ? '“' : '”')  // 英文双引号转中文双引号
+        .replace(/'/g, match => match === "'" ? '‘' : '’'); // 英文单引号转中文单引号
+    } else {
+      // 中文标点转英文标点
+      formattedText = formattedText
+        .replace(/，/g, ',')
+        .replace(/。/g, '.')
+        .replace(/！/g, '!')
+        .replace(/？/g, '?')
+        .replace(/：/g, ':')
+        .replace(/；/g, ';')
+        .replace(/‘/g, "'")
+        .replace(/’/g, "'")
+        .replace(/“/g, '"')
+        .replace(/”/g, '"')
+        .replace(/（/g, '(')
+        .replace(/）/g, ')')
+        .replace(/《/g, '<')
+        .replace(/》/g, '>')
+        .replace(/、/g, ',')
+        .replace(/——/g, '--');
+    }
+  }
+
+  if (method === 'all' || method === 'space') {
+    // 中英文之间添加空格
+    formattedText = formattedText.replace(/([\u4E00-\u9FA5])([A-Za-z0-9\(\[\{@#])/g, '$1 $2');
+    formattedText = formattedText.replace(/([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA5])/g, '$1 $2');
+  }
+
+  return formattedText;
 }
 
 function formatText(text: string | null, method: string) {
@@ -164,4 +220,58 @@ function formatText(text: string | null, method: string) {
   }
 
   return text;
+}
+
+
+function isMainlyChinese(text: string): boolean {
+  const chineseCharRegex = /[\u4e00-\u9fff]/;
+  let chineseCharCount = 0;
+  let nonChineseCharCount = 0;
+
+  for (let i = 0; i < text.length; i++) {
+    if (chineseCharRegex.test(text[i])) {
+      chineseCharCount++;
+    } else {
+      nonChineseCharCount++;
+    }
+  }
+
+  return chineseCharCount > nonChineseCharCount;
+}
+
+
+function needsFormatting(text: string, formattingMethod: string): boolean {
+  if (formattingMethod === "space") {
+    const spaceRegex = /([\u4E00-\u9FA3])([A-Za-z0-9\(\[\{@#])|([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA3])/g;
+    return spaceRegex.test(text);
+  } else if (formattingMethod === "punctuation") {
+    const isChinese = isMainlyChinese(text);
+    const chinesePunctuationRegex = /[，。！？：；‘’“”（）《》、——]/;
+    const englishPunctuationRegex = /[,\.!?:;'""()<>]/;
+
+    if (isChinese) {
+      // 对于中文文本，检查是否有英文标点
+      return englishPunctuationRegex.test(text);
+    } else {
+      // 对于英文文本，检查是否有中文标点
+      return chinesePunctuationRegex.test(text);
+    }
+  }
+
+  return false;
+}
+
+
+async function displayRecordsAsTable(records: { recordId: string, fieldId: string }[], uiBuilder: UIBuilder, table: ITable, formattingMethod: string) {
+  let markdownTable = `| 原始内容 | 格式化后内容 |\n| --- | --- |\n`;
+
+  for (const { recordId, fieldId } of records) {
+    const field = table.getField(fieldId) as ITextField;
+    const originalText = await field.getValue(recordId);
+    const formattedText = formatText(originalText, formattingMethod);
+
+    markdownTable += `| ${originalText} | ${formattedText} |\n`;
+  }
+
+  uiBuilder.markdown(markdownTable);
 }
