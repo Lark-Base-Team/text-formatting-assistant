@@ -190,25 +190,8 @@ function isMainlyChinese(text: string): boolean {
 }
 
 function needsFormatting(text: string, formattingMethod: string): boolean {
-  if (formattingMethod === "space") {
-    const spaceRegex =
-      /([\u4E00-\u9FA3])([A-Za-z0-9\(\[\{@#])|([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA3])/g;
-    return spaceRegex.test(text);
-  } else if (formattingMethod === "punctuation") {
-    const isChinese = isMainlyChinese(text);
-    const chinesePunctuationRegex = /[，。！？：；‘’“”（）《》、——]/;
-    const englishPunctuationRegex = /[,\.!?:;'""()<>]/;
-
-    if (isChinese) {
-      // 对于中文文本，检查是否有英文标点
-      return englishPunctuationRegex.test(text);
-    } else {
-      // 对于英文文本，检查是否有中文标点
-      return chinesePunctuationRegex.test(text);
-    }
-  }
-
-  return false;
+  const formattedText = formatText(text, formattingMethod);
+  return formattedText !== text;
 }
 
 async function displayRecordsAsTable(
