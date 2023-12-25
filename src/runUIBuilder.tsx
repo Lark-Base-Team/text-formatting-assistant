@@ -1,6 +1,7 @@
 import {
   FieldType,
   // IRecord,
+  IOpenSegment,
   ITable,
   ITextField,
   UIBuilder,
@@ -64,7 +65,8 @@ export default async function main(
         const recordIdList = await table.getRecordIdList();
         for (const recordId of recordIdList) {
           for (const field of fields) {
-            const fieldValue = await field.getValue(recordId);
+            const fieldValueSegments = await field.getValue(recordId) as IOpenSegment[];
+            const fieldValue = fieldValueSegments.map(segment => segment.text).join('');
             console.log("fieldValue: " + fieldValue);
 
             // 检查是否需要格式化并添加到数组
