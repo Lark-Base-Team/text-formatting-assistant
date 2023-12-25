@@ -12,7 +12,10 @@ export default async function main(
   uiBuilder: UIBuilder,
   { t }: UseTranslationResponse<"translation", undefined>
 ) {
-  let recordsToFormat: { recordId: string; fieldId: string }[] = []; // 存储需要格式化的记录ID和字段ID
+  let recordsToFormat: { recordId: string; fieldId: string; formattedValue?: string }[] = []; // 存储需要格式化的记录ID和字段ID  
+  let formattedTextMap = new Map<string, string>(); // 映射用于存储原始文本和对应的格式化文本
+  
+
   uiBuilder.markdown(`## ${t("text_formatting_title")}`);
   uiBuilder.markdown(t("text_formatting_description"));
   uiBuilder.form(
@@ -67,32 +70,36 @@ export default async function main(
           for (const field of fields) {
             const fieldValueSegments = await field.getValue(recordId) as IOpenSegment[];
             const fieldValue = fieldValueSegments.map(segment => segment.text).join('');
-            console.log("fieldValue: " + fieldValue);
-
+            const formattedFieldValue = formatText(fieldValue, formattingMethod);
+        
+            // 使用 recordId 和 fieldId 的组合作为键
+            formattedTextMap.set(`${recordId}-${field.id}`, formattedFieldValue);
+        
             // 检查是否需要格式化并添加到数组
-            if (fieldValue && needsFormatting(fieldValue, formattingMethod)) {
+            if (fieldValue !== formattedFieldValue) {
               recordsToFormat.push({ recordId, fieldId: field.id });
-              console.log("recordsToFormat: " + recordsToFormat);
             }
           }
         }
 
         // 显示需要格式化的记录
-        displayRecordsAsTable(recordsToFormat, uiBuilder);
+        displayRecordsAsTable(recordsToFormat, uiBuilder,table,formattedTextMap);
       } else if (key === t("format_button")) {
         let count = 0; // 格式化的单元格数量
 
-        for (const { recordId, fieldId } of recordsToFormat) {
+        for (const { recordId, fieldId, formattedValue } of recordsToFormat) {
           // 执行格式化操作...
-          const res = await formatRecord(
-            recordId,
-            fieldId,
-            formattingMethod,
-            table
-          );
-          count += res ? 1 : 0;
+          if (formattedValue !== undefined) {
+            const res = await formatRecord(
+              recordId,
+              fieldId,
+              table,
+              formattedTextMap
+            );
+            count += res ? 1 : 0;
+          }
         }
-
+      
         uiBuilder.message.success(
           `${t("formatting_completed")} ${count} ${t("cells_formatted")}`
         );
@@ -193,26 +200,51 @@ function isMainlyChinese(text: string): boolean {
   return chineseCharCount > nonChineseCharCount;
 }
 
-function needsFormatting(text: string, formattingMethod: string): boolean {
-  const formattedText = formatText(text, formattingMethod);
-  return formattedText !== text;
-}
+// function needsFormatting(recordId: string, fieldId: string, text: string,formattedTextMap: Map<string, string>): boolean {
+//   const formattedText = formattedTextMap.get(`${recordId}-${fieldId}`);
+//   return formattedText !== undefined && formattedText !== text;
+// }
+
+
 
 async function displayRecordsAsTable(
   records: { recordId: string; fieldId: string }[],
   uiBuilder: UIBuilder,
   table: ITable,
-  formattingMethod: string
+  formattedTextMap: Map<string, string>
 ) {
   let markdownTable = `| 原始内容 | 格式化后内容 |\n| --- | --- |\n`;
 
   for (const { recordId, fieldId } of records) {
     const field = table.getField(fieldId) as ITextField;
     const originalText = await field.getValue(recordId);
-    const formattedText = formatText(originalText, formattingMethod);
+    const formattedText = formattedTextMap.get(`${recordId}-${fieldId}`);
 
     markdownTable += `| ${originalText} | ${formattedText} |\n`;
   }
 
   uiBuilder.markdown(markdownTable);
 }
+
+
+
+async function formatRecord(
+  recordId: string,
+  fieldId: string,
+  table: ITable,
+  formattedTextMap: Map<string, string>
+): Promise<boolean> {
+  const formattedText = formattedTextMap.get(`${recordId}-${fieldId}`);
+  if (formattedText !== undefined) {
+    try {
+      const field = table.getField(fieldId) as ITextField;
+      await field.setValue(recordId, formattedText);
+      return true;
+    } catch (error) {
+      console.error('Error updating record:', error);
+      return false;
+    }
+  }
+  return false;
+}
+
