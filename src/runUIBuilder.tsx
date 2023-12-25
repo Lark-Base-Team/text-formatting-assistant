@@ -67,6 +67,14 @@ export default async function main(
         for (const recordId of recordIdList) {
           for (const field of fields) {
             const fieldValueSegments = await field.getValue(recordId) as IOpenSegment[];
+
+            // 确保 fieldValueSegments 不是 null 或 undefined
+            if (!fieldValueSegments) {
+              // 处理 fieldValueSegments 为 null 或 undefined 的情况
+              continue; // 或者采取其他措施
+            }
+
+
             const originalText = fieldValueSegments.map(segment => segment.text).join('');
             const formattedText = formatText(originalText, formattingMethod);
         
