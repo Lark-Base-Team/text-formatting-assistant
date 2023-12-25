@@ -12,12 +12,8 @@ export default async function main(
   uiBuilder: UIBuilder,
   { t }: UseTranslationResponse<"translation", undefined>
 ) {
-  let recordsToFormat: {
-    recordId: string;
-    fieldId: string;
-    formattedValue?: string;
-  }[] = []; // 存储需要格式化的记录ID和字段ID
-  let formattedTextMap = new Map<string, string>(); // 映射用于存储原始文本和对应的格式化文本
+  let recordsMap = new Map<string, { originalText: string, formattedText: string }>();
+
 
   uiBuilder.markdown(`## ${t("text_formatting_title")}`);
   uiBuilder.markdown(t("text_formatting_description"));
@@ -66,64 +62,49 @@ export default async function main(
       uiBuilder.showLoading(t("processing_data"));
 
       if (key === t("find_button")) {
-        recordsToFormat = [];
-
         const recordIdList = await table.getRecordIdList();
         for (const recordId of recordIdList) {
           for (const field of fields) {
-            const fieldValueSegments = (await field.getValue(
-              recordId
-            )) as IOpenSegment[];
-            const fieldValue = fieldValueSegments
-              .map((segment) => segment.text)
-              .join("");
-            const formattedFieldValue = formatText(
-              fieldValue,
-              formattingMethod
-            );
-
-            // 使用 recordId 和 fieldId 的组合作为键
-            formattedTextMap.set(
-              `${recordId}-${field.id}`,
-              formattedFieldValue
-            );
-            console.log("formattedTextMap:", formattedTextMap);
-
-            // 检查是否需要格式化并添加到数组
-            if (fieldValue !== formattedFieldValue) {
-              recordsToFormat.push({ recordId, fieldId: field.id });
-              console.log("recordsToFormat:", recordsToFormat);
+            const fieldValueSegments = await field.getValue(recordId) as IOpenSegment[];
+            const originalText = fieldValueSegments.map(segment => segment.text).join('');
+            const formattedText = formatText(originalText, formattingMethod);
+        
+            if (originalText !== formattedText) {
+              const key = `${recordId}-${field.id}`;
+              recordsMap.set(key, { originalText, formattedText });
             }
           }
         }
 
         // 显示需要格式化的记录
         displayRecordsAsTable(
-          recordsToFormat,
-          uiBuilder,
-          table,
-          formattedTextMap
+          recordsMap,
+          uiBuilder          
         );
       } else if (key === t("format_button")) {
         let count = 0; // 格式化的单元格数量
-
-        for (const { recordId, fieldId, formattedValue } of recordsToFormat) {
+      
+        for (const [mapKey, { formattedText }] of recordsMap) {
+          // 提取 recordId 和 fieldId
+          const [recordId, fieldId] = mapKey.split("-");
+      
           // 执行格式化操作...
-          if (formattedValue !== undefined) {
+          if (formattedText !== undefined) {
             const res = await formatRecord(
               recordId,
               fieldId,
               table,
-              formattedTextMap
+              recordsMap
             );
             count += res ? 1 : 0;
           }
         }
-
+      
         uiBuilder.message.success(
           `${t("formatting_completed")} ${count} ${t("cells_formatted")}`
         );
       }
+      
 
       uiBuilder.hideLoading();
       uiBuilder.message.success(t("formatting_completed"));
@@ -220,46 +201,43 @@ function isMainlyChinese(text: string): boolean {
   return chineseCharCount > nonChineseCharCount;
 }
 
-// function needsFormatting(recordId: string, fieldId: string, text: string,formattedTextMap: Map<string, string>): boolean {
-//   const formattedText = formattedTextMap.get(`${recordId}-${fieldId}`);
+// function needsFormatting(recordId: string, fieldId: string, text: string,recordsMap: Map<string, string>): boolean {
+//   const formattedText = recordsMap.get(`${recordId}-${fieldId}`);
 //   return formattedText !== undefined && formattedText !== text;
 // }
 
 async function displayRecordsAsTable(
-  records: { recordId: string; fieldId: string }[],
-  uiBuilder: UIBuilder,
-  table: ITable,
-  formattedTextMap: Map<string, string>
+  recordsMap: Map<string, { originalText: string, formattedText: string }>,
+  uiBuilder: UIBuilder
 ) {
   let markdownTable = `| 原始内容 | 格式化后内容 |\n| --- | --- |\n`;
 
-  for (const { recordId, fieldId } of records) {
-    const field = table.getField(fieldId) as ITextField;
-    const originalText = await field.getValue(recordId);
-    const formattedText = formattedTextMap.get(`${recordId}-${fieldId}`);
-
+  for (const [key, { originalText, formattedText }] of recordsMap.entries()) {
     markdownTable += `| ${originalText} | ${formattedText} |\n`;
   }
 
   uiBuilder.markdown(markdownTable);
 }
 
+
 async function formatRecord(
   recordId: string,
   fieldId: string,
   table: ITable,
-  formattedTextMap: Map<string, string>
+  recordsMap: Map<string, { originalText: string, formattedText: string }>
 ): Promise<boolean> {
-  const formattedText = formattedTextMap.get(`${recordId}-${fieldId}`);
-  if (formattedText !== undefined) {
-    try {
-      const field = table.getField(fieldId) as ITextField;
-      await field.setValue(recordId, formattedText);
+  try {
+    // 确保使用 await 来处理 Promise
+    const field = await table.getField(fieldId) as ITextField;
+
+    const textInfo = recordsMap.get(`${recordId}-${fieldId}`);
+    if (textInfo && textInfo.formattedText !== undefined) {
+      await field.setValue(recordId, textInfo.formattedText);
       return true;
-    } catch (error) {
-      console.error("Error updating record:", error);
-      return false;
     }
+  } catch (error) {
+    console.error('Error updating record:', error);
   }
+
   return false;
 }
