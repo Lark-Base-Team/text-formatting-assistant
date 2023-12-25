@@ -87,10 +87,12 @@ export default async function main(
               `${recordId}-${field.id}`,
               formattedFieldValue
             );
+            console.log("formattedTextMap:", formattedTextMap);
 
             // 检查是否需要格式化并添加到数组
             if (fieldValue !== formattedFieldValue) {
               recordsToFormat.push({ recordId, fieldId: field.id });
+              console.log("recordsToFormat:", recordsToFormat);
             }
           }
         }
