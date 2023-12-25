@@ -11,7 +11,7 @@ export default async function main(
   uiBuilder: UIBuilder,
   { t }: UseTranslationResponse<"translation", undefined>
 ) {
-  let recordsToFormat: { recordId: string, fieldId: string }[] = []; // 存储需要格式化的记录ID和字段ID
+  let recordsToFormat: { recordId: string; fieldId: string }[] = []; // 存储需要格式化的记录ID和字段ID
   uiBuilder.markdown(`## ${t("text_formatting_title")}`);
   uiBuilder.markdown(t("text_formatting_description"));
   uiBuilder.form(
@@ -33,7 +33,7 @@ export default async function main(
             { label: t("space_formatting"), value: "space" },
             // { label: t("punctuation_formatting_1"), value: "punctuation_1" }, //标点符号（中文标点转英文标点）
             // { label: t("punctuation_formatting_2"), value: "punctuation_2" }, //标点符号（英文标点转中文标点）
-            { label: t("punctuation_formatting"), value: "punctuation" }, 
+            { label: t("punctuation_formatting"), value: "punctuation" },
             //标点符号
             //对于中文单元格：英文标点转中文标点
             //对于英文单元格：中文标点转英文标点
@@ -100,59 +100,64 @@ export default async function main(
   );
 }
 
-
 function formatText(text: string, method: string): string {
   // 如果 text 为空或不是字符串，则返回原始值
-  if (typeof text !== 'string' || text == null) {
+  if (typeof text !== "string" || text == null) {
     return text;
   }
 
   let formattedText = text;
 
-  if (method === 'all' || method === 'punctuation') {
+  if (method === "all" || method === "punctuation") {
     const isChinese = isMainlyChinese(text);
     if (isChinese) {
       // 英文标点转中文标点
       formattedText = formattedText
-        .replace(/,/g, '，')
-        .replace(/\./g, '。')
-        .replace(/!/g, '！')
-        .replace(/\?/g, '？')
-        .replace(/:/g, '：')
-        .replace(/;/g, '；')
-        .replace(/\(/g, '（')
-        .replace(/\)/g, '）')
-        .replace(/</g, '《')
-        .replace(/>/g, '》')
-        .replace(/--/g, '——')
-        .replace(/"/g, match => match === '"' ? '“' : '”')  // 英文双引号转中文双引号
-        .replace(/'/g, match => match === "'" ? '‘' : '’'); // 英文单引号转中文单引号
+        .replace(/,/g, "，")
+        .replace(/\./g, "。")
+        .replace(/!/g, "！")
+        .replace(/\?/g, "？")
+        .replace(/:/g, "：")
+        .replace(/;/g, "；")
+        .replace(/\(/g, "（")
+        .replace(/\)/g, "）")
+        .replace(/</g, "《")
+        .replace(/>/g, "》")
+        .replace(/--/g, "——")
+        .replace(/"/g, (match) => (match === '"' ? "“" : "”")) // 英文双引号转中文双引号
+        .replace(/'/g, (match) => (match === "'" ? "‘" : "’")); // 英文单引号转中文单引号
     } else {
       // 中文标点转英文标点
       formattedText = formattedText
-        .replace(/，/g, ',')
-        .replace(/。/g, '.')
-        .replace(/！/g, '!')
-        .replace(/？/g, '?')
-        .replace(/：/g, ':')
-        .replace(/；/g, ';')
+        .replace(/，/g, ",")
+        .replace(/。/g, ".")
+        .replace(/！/g, "!")
+        .replace(/？/g, "?")
+        .replace(/：/g, ":")
+        .replace(/；/g, ";")
         .replace(/‘/g, "'")
         .replace(/’/g, "'")
         .replace(/“/g, '"')
         .replace(/”/g, '"')
-        .replace(/（/g, '(')
-        .replace(/）/g, ')')
-        .replace(/《/g, '<')
-        .replace(/》/g, '>')
-        .replace(/、/g, ',')
-        .replace(/——/g, '--');
+        .replace(/（/g, "(")
+        .replace(/）/g, ")")
+        .replace(/《/g, "<")
+        .replace(/》/g, ">")
+        .replace(/、/g, ",")
+        .replace(/——/g, "--");
     }
   }
 
-  if (method === 'all' || method === 'space') {
+  if (method === "all" || method === "space") {
     // 中英文之间添加空格
-    formattedText = formattedText.replace(/([\u4E00-\u9FA5])([A-Za-z0-9\(\[\{@#])/g, '$1 $2');
-    formattedText = formattedText.replace(/([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA5])/g, '$1 $2');
+    formattedText = formattedText.replace(
+      /([\u4E00-\u9FA5])([A-Za-z0-9\(\[\{@#])/g,
+      "$1 $2"
+    );
+    formattedText = formattedText.replace(
+      /([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA5])/g,
+      "$1 $2"
+    );
   }
 
   return formattedText;
@@ -222,7 +227,6 @@ function formatText(text: string | null, method: string) {
   return text;
 }
 
-
 function isMainlyChinese(text: string): boolean {
   const chineseCharRegex = /[\u4e00-\u9fff]/;
   let chineseCharCount = 0;
@@ -239,10 +243,10 @@ function isMainlyChinese(text: string): boolean {
   return chineseCharCount > nonChineseCharCount;
 }
 
-
 function needsFormatting(text: string, formattingMethod: string): boolean {
   if (formattingMethod === "space") {
-    const spaceRegex = /([\u4E00-\u9FA3])([A-Za-z0-9\(\[\{@#])|([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA3])/g;
+    const spaceRegex =
+      /([\u4E00-\u9FA3])([A-Za-z0-9\(\[\{@#])|([A-Za-z0-9\.,!@#%?\)\]\}])([\u4E00-\u9FA3])/g;
     return spaceRegex.test(text);
   } else if (formattingMethod === "punctuation") {
     const isChinese = isMainlyChinese(text);
@@ -261,8 +265,12 @@ function needsFormatting(text: string, formattingMethod: string): boolean {
   return false;
 }
 
-
-async function displayRecordsAsTable(records: { recordId: string, fieldId: string }[], uiBuilder: UIBuilder, table: ITable, formattingMethod: string) {
+async function displayRecordsAsTable(
+  records: { recordId: string; fieldId: string }[],
+  uiBuilder: UIBuilder,
+  table: ITable,
+  formattingMethod: string
+) {
   let markdownTable = `| 原始内容 | 格式化后内容 |\n| --- | --- |\n`;
 
   for (const { recordId, fieldId } of records) {
