@@ -15,8 +15,11 @@ const resources = {
       "find_button": "查找",
       "format_button": "一键优化",
       "formatting_completed": "文本优化完成",
+      "finding_completed": "查找完成",
       "form_incomplete_error": "表单未填写完整",
       "processing_data": "优化中...",
+      "finding_data": "查找中...",
+      "cells_formatted": "个单元格已优化",
     },
   },
   en: {

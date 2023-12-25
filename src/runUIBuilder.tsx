@@ -59,9 +59,10 @@ export default async function main(
         throw new Error(t("form_incomplete_error"));
       }
 
-      uiBuilder.showLoading(t("processing_data"));
+      // uiBuilder.showLoading(t("processing_data"));
 
       if (key === t("find_button")) {
+        uiBuilder.showLoading(t("finding_data"));
         const recordIdList = await table.getRecordIdList();
         for (const recordId of recordIdList) {
           for (const field of fields) {
@@ -81,7 +82,10 @@ export default async function main(
           recordsMap,
           uiBuilder          
         );
+        uiBuilder.message.success(t("finding_completed"));
+        uiBuilder.hideLoading();
       } else if (key === t("format_button")) {
+        uiBuilder.showLoading(t("processing_data"));
         let count = 0; // 格式化的单元格数量
       
         for (const [mapKey, { formattedText }] of recordsMap) {
@@ -103,11 +107,12 @@ export default async function main(
         uiBuilder.message.success(
           `${t("formatting_completed")} ${count} ${t("cells_formatted")}`
         );
+        uiBuilder.hideLoading();
       }
       
 
-      uiBuilder.hideLoading();
-      uiBuilder.message.success(t("formatting_completed"));
+      // uiBuilder.hideLoading();
+      // uiBuilder.message.success(t("formatting_completed"));
     }
   );
 }
