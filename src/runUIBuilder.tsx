@@ -65,10 +65,12 @@ export default async function main(
         for (const recordId of recordIdList) {
           for (const field of fields) {
             const fieldValue = await field.getValue(recordId);
+            console.log(fieldValue);
 
             // 检查是否需要格式化并添加到数组
             if (fieldValue && needsFormatting(fieldValue, formattingMethod)) {
               recordsToFormat.push({ recordId, fieldId: field.id });
+              console.log(recordsToFormat)
             }
           }
         }
