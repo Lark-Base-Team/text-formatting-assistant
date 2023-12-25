@@ -9,3 +9,10 @@ You can learn more in the [Base Extension Development Guide](https://bytedance.f
 ## Install packages
 
 Install packages in Shell pane or search and add in Packages pane.
+
+
+## TODO
+- 查找时候转菊花的文案改一下，应该是查找中
+- 如果查找到的记录为空，应该打印的时候不打印表头，只打印一行提示
+- 点击一键格式化的时候，表格不应该消失
+- 表格怎么这么丑
