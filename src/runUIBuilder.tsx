@@ -29,6 +29,7 @@ export default async function main(
           label: t("select_fields_label"),
           sourceTable: "table",
           multiple: true, // Allow multiple selections
+          placeholder: t("field_select_placeholder"),
           filterByTypes: [FieldType.Text as any], // Only display text fields
         }),
         form.select("formattingMethod", {
@@ -129,7 +130,7 @@ export default async function main(
             count += res ? 1 : 0;
           }
         }
-        uiBuilder.message.success(t('formatting_completed'),count);
+        uiBuilder.message.success(t("formatting_completed"), count);
         uiBuilder.hideLoading();
       }
     }

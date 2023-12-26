@@ -8,8 +8,8 @@ const resources = {
       select_data_table: "选择数据表",
       select_fields_label: "要优化的字段（文本）",
       formatting_method_label: "优化方式",
-      field_select_placeholder: "请选择要优化的文本字段",
-      all_formatting: "全部优化",
+      field_select_placeholder: "请选择，可单选或多选",
+      all_formatting: "全面优化（空格格式与标点符号）",
       space_formatting: "仅空格格式",
       punctuation_formatting: "仅标点符号",
       find_button: "查找",
@@ -24,28 +24,36 @@ const resources = {
       no_records_found_error: "没有可优化的格式问题",
       table_original_content: "当前",
       table_formatted_content: "建议",
-      number_of_results: "共找到 {{count}} 个优化建议",
+      number_of_results: "共 {{count}} 个优化建议",
     },
   },
   en: {
     translation: {
-      text_formatting_title: "Text Formatting Assistant",
-      text_formatting_description:
-        "This plugin offers formatting optimization for text fields, including adding spaces between English/numbers and Chinese, and converting between Chinese and English punctuation.",
+      text_description:
+        "📝 Text field format optimization, including adding spaces between English or numbers and Chinese, and unifying Chinese and English punctuation.",
+      text_description_2:
+        "👉 [Demo and Usage Instructions](https://fexakcngwi.feishu.cn/docx/CqULdiaBXoFEiMxrI2rcK71Dn7d)",
       select_data_table: "Select Data Table",
       select_fields_label: "Fields to Optimize (Text)",
-      formatting_method_label: "Method of Optimization",
-      field_select_placeholder: "Please select the Text fields to optimize",
-      space_formatting:
-        "Space Formatting: Add spaces between English/numbers and Chinese characters",
-      punctuation_formatting_1:
-        "Punctuation: Convert Chinese punctuation to English",
-      punctuation_formatting_2:
-        "Punctuation: Convert English punctuation to Chinese",
+      formatting_method_label: "Optimization Method",
+      field_select_placeholder:
+        "Please select, single or multiple choices allowed",
+      all_formatting: "Comprehensive Formatting (Space and Punctuation)",
+      space_formatting: "Space Formatting Only",
+      punctuation_formatting: "Punctuation Formatting Only",
+      find_button: "Find",
       format_button: "Optimize with One Click",
-      formatting_completed: "Text Optimization Completed",
+      formatting_completed: "Completed: {{count}} cells optimized",
+      finding_completed: "Finding Completed",
       form_incomplete_error: "Form Incomplete",
-      processing_data: "Optimizing...",
+      processing_data: "Optimizing",
+      finding_data: "Finding",
+      no_records_found: "No formatting issues found, great!",
+      find_button_not_clicked_error: "Please click 'Find' first",
+      no_records_found_error: "No formatting issues to optimize",
+      table_original_content: "Current",
+      table_formatted_content: "Suggested",
+      number_of_results: "Total {{count}} optimization suggestions",
     },
   },
 };
