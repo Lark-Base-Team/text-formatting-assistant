@@ -95,6 +95,8 @@ export default async function main(
         uiBuilder.message.success(t("finding_completed"));
         uiBuilder.hideLoading();
       } else if (key === t("format_button")) {
+        // 重新显示表格
+        await displayRecordsAsTable(recordsMap, uiBuilder);
         uiBuilder.showLoading(t("processing_data"));
         let count = 0; // 格式化的单元格数量
 
