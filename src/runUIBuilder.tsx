@@ -94,7 +94,7 @@ export default async function main(
         }
         isDataAvailable = recordsMap.size > 0; // 更新数据可用性标志
         // 显示需要格式化的记录
-        displayRecordsAsTable(recordsMap, uiBuilder, t);
+        displayRecordsAsTable(recordsMap, uiBuilder, t, table);
         uiBuilder.message.success(t("finding_completed"));
         uiBuilder.hideLoading();
       } else if (key === t("format_button")) {
@@ -104,7 +104,7 @@ export default async function main(
           return; // 终止处理
         }
         // 重新显示表格
-        await displayRecordsAsTable(recordsMap, uiBuilder, t);
+        await displayRecordsAsTable(recordsMap, uiBuilder, t, table);
         // 检查是否有数据可用于格式化
         if (!isDataAvailable) {
           uiBuilder.message.error(t("no_records_found_error")); // 显示错误消息
@@ -261,39 +261,64 @@ function isMainlyChinese(text: string): boolean {
 async function displayRecordsAsTable(
   recordsMap: Map<string, { originalText: string; formattedText: string }>,
   uiBuilder: UIBuilder,
-  t: Function
+  t: Function,
+  table: ITable // 假设的函数来获取 ITable 实例
 ) {
   if (recordsMap.size === 0) {
     uiBuilder.markdown(t("no_records_found"));
     return;
   }
 
+  const fieldMetaMap = new Map<string, string>(); // 用于存储字段 ID 与名称的映射
+
+  // 获取所有字段的元信息
+  for (const [key] of recordsMap.entries()) {
+    const fieldId = key.split("-")[1];
+    if (!fieldMetaMap.has(fieldId)) {
+      const fieldMeta = await table.getFieldMetaById(fieldId);
+      fieldMetaMap.set(fieldId, fieldMeta.name);
+    }
+  }
+
   // 分字段存储记录
-  const fieldWiseRecords = new Map();
+  const fieldWiseRecords = new Map<
+    string,
+    { key: string; value: { originalText: string; formattedText: string } }[]
+  >();
 
   for (const [key, value] of recordsMap.entries()) {
-    const fieldName = key.split("-")[1]; // 解析字段名称
+    const fieldId = key.split("-")[1];
+    const fieldName = fieldMetaMap.get(fieldId) || fieldId; // 默认使用 fieldId
+  
+    // 检查是否已经为该字段名初始化了一个数组，如果没有，则初始化一个空数组
     if (!fieldWiseRecords.has(fieldName)) {
       fieldWiseRecords.set(fieldName, []);
     }
-    fieldWiseRecords.get(fieldName).push({ key, value });
+  
+    // 此时可以确信 fieldWiseRecords.get(fieldName) 不会是 undefined
+    fieldWiseRecords.get(fieldName)!.push({ key, value }); // 使用 "!" 断言非空
   }
 
   // 为每个字段创建一个表格
-  fieldWiseRecords.forEach((records, fieldName) => {
-    // 显示字段名称和结果数量
-    uiBuilder.markdown(`**${fieldName} - ${t("number_of_results")}: ${records.length}**`);
+  for (const [fieldName, records] of fieldWiseRecords.entries()) {
+    // 显示字段名称和结果数量，使用国际化函数 t
+    uiBuilder.markdown(
+      `**${fieldName} - ${t("number_of_results", { count: records.length })}**`
+    );
 
-    let markdownTable = `| **${t("table_original_content")}** | **${t("table_formatted_content")}** |\n| --- | --- |\n`;
+    let markdownTable = `| **${t("table_original_content")}** | **${t(
+      "table_formatted_content"
+    )}** |\n| --- | --- |\n`;
 
-    for (const { value: { originalText, formattedText } } of records) {
+    for (const {
+      value: { originalText, formattedText },
+    } of records) {
       markdownTable += `| ${originalText} | ${formattedText} |\n`;
     }
 
     uiBuilder.markdown(markdownTable);
-  });
+  }
 }
-
 
 async function formatRecord(
   recordId: string,
