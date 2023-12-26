@@ -14,7 +14,7 @@ const resources = {
       punctuation_formatting: "仅标点符号",
       find_button: "查找",
       format_button: "一键优化",
-      formatting_completed: "完成：{{count}} 个单元格已优化",
+      formatting_completed: "完成：优化了 {{count}} 个格式问题",
       finding_completed: "查找完成",
       form_incomplete_error: "表单未填写完整",
       processing_data: "优化中",
@@ -43,7 +43,12 @@ const resources = {
       punctuation_formatting: "Punctuation Formatting Only",
       find_button: "Find",
       format_button: "Optimize with One Click",
-      formatting_completed: "Completed: {{count}} cells optimized",
+      formatting_completed_zero:
+        "Completed: Optimized {{count}} formatting issues",
+      formatting_completed_one:
+        "Completed: Optimized {{count}} formatting issue",
+      formatting_completed_other:
+        "Completed: Optimized {{count}} formatting issues",
       finding_completed: "Finding Completed",
       form_incomplete_error: "Form Incomplete",
       processing_data: "Optimizing",
@@ -53,7 +58,9 @@ const resources = {
       no_records_found_error: "No formatting issues to optimize",
       table_original_content: "Current",
       table_formatted_content: "Suggested",
-      number_of_results: "Total {{count}} optimization suggestions",
+      number_of_results_zero: "Total {{count}} optimization suggestions",
+      number_of_results_one: "Total {{count}} optimization suggestion",
+      number_of_results_other: "Total {{count}} optimization suggestions",
     },
   },
 };

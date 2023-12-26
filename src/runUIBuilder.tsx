@@ -130,7 +130,7 @@ export default async function main(
             count += res ? 1 : 0;
           }
         }
-        uiBuilder.message.success(t("formatting_completed"), count);
+        uiBuilder.message.success(t("formatting_completed"), { count: count });
         uiBuilder.hideLoading();
       }
     }
