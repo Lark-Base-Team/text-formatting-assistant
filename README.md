@@ -19,4 +19,5 @@ Install packages in Shell pane or search and add in Packages pane.
 - [x] 点击查找之前不能点击一键优化按钮
 - [x] 未发现问题的时候，应该也无法点击一键优化按钮
 - [x] 没有要优化的内容的时候，点击优化按钮，提示要仍然存在
+- [ ] 表格里最后一列有一个单独优化的按钮
 - [ ] 表格怎么这么丑

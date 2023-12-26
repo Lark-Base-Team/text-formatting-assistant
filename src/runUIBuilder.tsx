@@ -243,8 +243,8 @@ async function displayRecordsAsTable(
     return;
   }
 
-  let markdownTable = `| **${t("original_content")}** | **${t(
-    "formatted_content"
+  let markdownTable = `| **${t("table_original_content")}** | **${t(
+    "table_formatted_content"
   )}** |\n| --- | --- |\n`;
 
   for (const [key, { originalText, formattedText }] of recordsMap.entries()) {
