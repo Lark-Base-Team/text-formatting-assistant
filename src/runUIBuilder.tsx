@@ -91,12 +91,12 @@ export default async function main(
         }
 
         // 显示需要格式化的记录
-        displayRecordsAsTable(recordsMap, uiBuilder);
+        displayRecordsAsTable(recordsMap, uiBuilder, t);
         uiBuilder.message.success(t("finding_completed"));
         uiBuilder.hideLoading();
       } else if (key === t("format_button")) {
         // 重新显示表格
-        await displayRecordsAsTable(recordsMap, uiBuilder);
+        await displayRecordsAsTable(recordsMap, uiBuilder, t);
         uiBuilder.showLoading(t("processing_data"));
         let count = 0; // 格式化的单元格数量
 
@@ -224,9 +224,18 @@ function isMainlyChinese(text: string): boolean {
 
 async function displayRecordsAsTable(
   recordsMap: Map<string, { originalText: string; formattedText: string }>,
-  uiBuilder: UIBuilder
+  uiBuilder: UIBuilder,
+  t: Function // 将 t 函数作为参数添加
 ) {
-  let markdownTable = `| 原始内容 | 格式化后内容 |\n| --- | --- |\n`;
+  // 检查记录是否为空
+  if (recordsMap.size === 0) {
+    uiBuilder.markdown(t("no_records_found")); // 使用传入的 t 函数进行国际化
+    return;
+  }
+
+  let markdownTable = `| **${t("original_content")}** | **${t(
+    "formatted_content"
+  )}** |\n| --- | --- |\n`;
 
   for (const [key, { originalText, formattedText }] of recordsMap.entries()) {
     markdownTable += `| ${originalText} | ${formattedText} |\n`;

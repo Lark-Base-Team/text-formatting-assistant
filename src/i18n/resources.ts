@@ -20,6 +20,7 @@ const resources = {
       "processing_data": "优化中...",
       "finding_data": "查找中...",
       "cells_formatted": "个单元格已优化",
+      "no_records_found": "未发现格式问题，太棒了！",
     },
   },
   en: {
