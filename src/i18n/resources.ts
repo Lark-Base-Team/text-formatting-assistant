@@ -24,7 +24,7 @@ const resources = {
       no_records_found_error: "没有可优化的格式问题",
       table_original_content: "当前",
       table_formatted_content: "建议",
-      number_of_results: "共找到{{count}}个优化建议",
+      number_of_results: "共找到 {{count}} 个优化建议",
     },
   },
   en: {
