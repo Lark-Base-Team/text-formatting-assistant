@@ -236,27 +236,64 @@ function isMainlyChinese(text: string): boolean {
 //   return formattedText !== undefined && formattedText !== text;
 // }
 
+// async function displayRecordsAsTable(
+//   recordsMap: Map<string, { originalText: string; formattedText: string }>,
+//   uiBuilder: UIBuilder,
+//   t: Function // 将 t 函数作为参数添加
+// ) {
+//   // 检查记录是否为空
+//   if (recordsMap.size === 0) {
+//     uiBuilder.markdown(t("no_records_found")); // 使用传入的 t 函数进行国际化
+//     return;
+//   }
+
+//   let markdownTable = `| **${t("table_original_content")}** | **${t(
+//     "table_formatted_content"
+//   )}** |\n| --- | --- |\n`;
+
+//   for (const [key, { originalText, formattedText }] of recordsMap.entries()) {
+//     markdownTable += `| ${originalText} | ${formattedText} |\n`;
+//   }
+
+//   uiBuilder.markdown(markdownTable);
+// }
+
 async function displayRecordsAsTable(
   recordsMap: Map<string, { originalText: string; formattedText: string }>,
   uiBuilder: UIBuilder,
-  t: Function // 将 t 函数作为参数添加
+  t: Function
 ) {
-  // 检查记录是否为空
   if (recordsMap.size === 0) {
-    uiBuilder.markdown(t("no_records_found")); // 使用传入的 t 函数进行国际化
+    uiBuilder.markdown(t("no_records_found"));
     return;
   }
 
-  let markdownTable = `| **${t("table_original_content")}** | **${t(
-    "table_formatted_content"
-  )}** |\n| --- | --- |\n`;
+  // 分字段存储记录
+  const fieldWiseRecords = new Map();
 
-  for (const [key, { originalText, formattedText }] of recordsMap.entries()) {
-    markdownTable += `| ${originalText} | ${formattedText} |\n`;
+  for (const [key, value] of recordsMap.entries()) {
+    const fieldName = key.split("-")[1]; // 解析字段名称
+    if (!fieldWiseRecords.has(fieldName)) {
+      fieldWiseRecords.set(fieldName, []);
+    }
+    fieldWiseRecords.get(fieldName).push({ key, value });
   }
 
-  uiBuilder.markdown(markdownTable);
+  // 为每个字段创建一个表格
+  fieldWiseRecords.forEach((records, fieldName) => {
+    // 显示字段名称和结果数量
+    uiBuilder.markdown(`**${fieldName} - ${t("number_of_results")}: ${records.length}**`);
+
+    let markdownTable = `| **${t("table_original_content")}** | **${t("table_formatted_content")}** |\n| --- | --- |\n`;
+
+    for (const { value: { originalText, formattedText } } of records) {
+      markdownTable += `| ${originalText} | ${formattedText} |\n`;
+    }
+
+    uiBuilder.markdown(markdownTable);
+  });
 }
+
 
 async function formatRecord(
   recordId: string,

@@ -19,6 +19,7 @@ Install packages in Shell pane or search and add in Packages pane.
 - [x] 点击查找之前不能点击一键优化按钮
 - [x] 未发现问题的时候，应该也无法点击一键优化按钮
 - [x] 没有要优化的内容的时候，点击优化按钮，提示要仍然存在
-- [ ] 表格里最后一列加个单独优化的按钮 
 - [x] 每次点击find按钮的时候，重置recordsMap和isDataAvailable 
+- [ ] 展示查找结果的时候，分字段展示，并且写出来找到的结果数量
+- [ ] 表格里最后一列加个单独优化的按钮 
 - [ ] 表格怎么这么丑
