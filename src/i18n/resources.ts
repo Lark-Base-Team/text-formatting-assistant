@@ -7,7 +7,7 @@ const resources = {
       "select_fields_label": "要优化的字段（文本）",
       "formatting_method_label": "优化方式",
       "field_select_placeholder": "请选择要优化的文本字段",
-      "all_formatting": "全部优化 - 空格格式和标点符号",
+      "all_formatting": "全部优化",
       "space_formatting": "仅空格格式",
       "punctuation_formatting": "仅标点符号",
       "find_button": "查找",

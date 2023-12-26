@@ -62,7 +62,11 @@ export default async function main(
       // uiBuilder.showLoading(t("processing_data"));
 
       if (key === t("find_button")) {
+        // 重置相关变量
+        recordsMap.clear(); // 清空记录映射
         findButtonClicked = true; // 更新查找按钮点击标志
+        isDataAvailable = false; // 重置数据可用性标志
+
         uiBuilder.showLoading(t("finding_data"));
         const recordIdList = await table.getRecordIdList();
         for (const recordId of recordIdList) {
