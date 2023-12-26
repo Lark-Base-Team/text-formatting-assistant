@@ -289,12 +289,12 @@ async function displayRecordsAsTable(
   for (const [key, value] of recordsMap.entries()) {
     const fieldId = key.split("-")[1];
     const fieldName = fieldMetaMap.get(fieldId) || fieldId; // 默认使用 fieldId
-  
+
     // 检查是否已经为该字段名初始化了一个数组，如果没有，则初始化一个空数组
     if (!fieldWiseRecords.has(fieldName)) {
       fieldWiseRecords.set(fieldName, []);
     }
-  
+
     // 此时可以确信 fieldWiseRecords.get(fieldName) 不会是 undefined
     fieldWiseRecords.get(fieldName)!.push({ key, value }); // 使用 "!" 断言非空
   }
