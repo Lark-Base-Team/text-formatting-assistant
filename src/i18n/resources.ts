@@ -14,7 +14,7 @@ const resources = {
       // "punctuation_formatting_2": "标点符号：英文标点转中文标点",
       "find_button": "查找",
       "format_button": "一键优化",
-      "formatting_completed": "文本优化完成",
+      "formatting_completed": "完成：",
       "finding_completed": "查找完成",
       "form_incomplete_error": "表单未填写完整",
       "processing_data": "优化中...",
