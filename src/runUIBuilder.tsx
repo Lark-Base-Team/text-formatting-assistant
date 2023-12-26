@@ -17,7 +17,8 @@ export default async function main(
   >();
   let findButtonClicked = false; // 跟踪是否点击过查找按钮
   let isDataAvailable = false; // 跟踪查找结果是否为空
-  uiBuilder.markdown(t("text_formatting_description"));
+  uiBuilder.markdown(`> ${t("text_description")}  
+   > ${t("text_description_2")} `);
   uiBuilder.form(
     (form) => ({
       formItems: [
@@ -128,10 +129,7 @@ export default async function main(
             count += res ? 1 : 0;
           }
         }
-
-        uiBuilder.message.success(
-          `${t("formatting_completed")} ${count} ${t("cells_formatted")}`
-        );
+        uiBuilder.message.success(t('formatting_completed'),count);
         uiBuilder.hideLoading();
       }
     }

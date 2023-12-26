@@ -1,9 +1,10 @@
 const resources = {
   zh: {
     translation: {
-      text_formatting_title: "文字排版助手",
-      text_formatting_description:
-        "提供文本字段的格式优化，包括在英文/数字和中文之间添加空格、中文英文标点之间互相转换。",
+      text_description:
+        "📝 文本字段的格式优化，包括在英文或数字与中文之间添加空格、中英文标点的统一。",
+      text_description_2:
+        "👉 [演示与使用说明](https://fexakcngwi.feishu.cn/docx/CqULdiaBXoFEiMxrI2rcK71Dn7d)",
       select_data_table: "选择数据表",
       select_fields_label: "要优化的字段（文本）",
       formatting_method_label: "优化方式",
@@ -13,12 +14,11 @@ const resources = {
       punctuation_formatting: "仅标点符号",
       find_button: "查找",
       format_button: "一键优化",
-      formatting_completed: "完成：",
+      formatting_completed: "完成：{{count}} 个单元格已优化",
       finding_completed: "查找完成",
       form_incomplete_error: "表单未填写完整",
-      processing_data: "优化中...",
-      finding_data: "查找中...",
-      cells_formatted: "个单元格已优化",
+      processing_data: "优化中",
+      finding_data: "查找中",
       no_records_found: "未发现格式问题，太棒了！",
       find_button_not_clicked_error: "请先「查找」",
       no_records_found_error: "没有可优化的格式问题",
