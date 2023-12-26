@@ -99,14 +99,14 @@ export default async function main(
           uiBuilder.message.error(t("find_button_not_clicked_error")); // 显示错误消息
           return; // 终止处理
         }
-
+        // 重新显示表格
+        await displayRecordsAsTable(recordsMap, uiBuilder, t);
         // 检查是否有数据可用于格式化
         if (!isDataAvailable) {
           uiBuilder.message.error(t("no_records_found_error")); // 显示错误消息
           return; // 终止处理
         }
-        // 重新显示表格
-        await displayRecordsAsTable(recordsMap, uiBuilder, t);
+
         uiBuilder.showLoading(t("processing_data"));
         let count = 0; // 格式化的单元格数量
 

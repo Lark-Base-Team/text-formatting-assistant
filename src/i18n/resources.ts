@@ -19,8 +19,8 @@ const resources = {
       "finding_data": "查找中...",
       "cells_formatted": "个单元格已优化",
       "no_records_found": "未发现格式问题，太棒了！",
-      "find_button_not_clicked_error": "请先点击「查找」",
-      "no_records_found_error": "未发现格式问题",
+      "find_button_not_clicked_error": "请先「查找」",
+      "no_records_found_error": "没有可优化的格式问题",
     },
   },
   en: {
