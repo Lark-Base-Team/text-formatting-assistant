@@ -16,8 +16,8 @@ export default async function main(
     string,
     { originalText: string; formattedText: string }
   >();
-
-  uiBuilder.markdown(`## ${t("text_formatting_title")}`);
+  let findButtonClicked = false; // 跟踪是否点击过查找按钮
+  let isDataAvailable = false; // 跟踪查找结果是否为空
   uiBuilder.markdown(t("text_formatting_description"));
   uiBuilder.form(
     (form) => ({
@@ -36,12 +36,10 @@ export default async function main(
           options: [
             { label: t("all_formatting"), value: "all" },
             { label: t("space_formatting"), value: "space" },
-            // { label: t("punctuation_formatting_1"), value: "punctuation_1" }, //标点符号（中文标点转英文标点）
-            // { label: t("punctuation_formatting_2"), value: "punctuation_2" }, //标点符号（英文标点转中文标点）
             { label: t("punctuation_formatting"), value: "punctuation" },
-            //标点符号
-            //对于中文单元格：英文标点转中文标点
-            //对于英文单元格：中文标点转英文标点
+            // 标点符号
+            // 对于中文单元格：英文标点转中文标点
+            // 对于英文单元格：中文标点转英文标点
           ],
           defaultValue: "all", // Default selected value
           description: t("formatting_method_description"), // Optional: Add a description or help text
@@ -64,6 +62,7 @@ export default async function main(
       // uiBuilder.showLoading(t("processing_data"));
 
       if (key === t("find_button")) {
+        findButtonClicked = true; // 更新查找按钮点击标志
         uiBuilder.showLoading(t("finding_data"));
         const recordIdList = await table.getRecordIdList();
         for (const recordId of recordIdList) {
@@ -89,12 +88,23 @@ export default async function main(
             }
           }
         }
-
+        isDataAvailable = recordsMap.size > 0; // 更新数据可用性标志
         // 显示需要格式化的记录
         displayRecordsAsTable(recordsMap, uiBuilder, t);
         uiBuilder.message.success(t("finding_completed"));
         uiBuilder.hideLoading();
       } else if (key === t("format_button")) {
+        // 检查是否点击过查找按钮
+        if (!findButtonClicked) {
+          uiBuilder.message.error(t("find_button_not_clicked_error")); // 显示错误消息
+          return; // 终止处理
+        }
+
+        // 检查是否有数据可用于格式化
+        if (!isDataAvailable) {
+          uiBuilder.message.error(t("no_records_found_error")); // 显示错误消息
+          return; // 终止处理
+        }
         // 重新显示表格
         await displayRecordsAsTable(recordsMap, uiBuilder, t);
         uiBuilder.showLoading(t("processing_data"));
