@@ -1,6 +1,5 @@
 import {
   FieldType,
-  // IRecord,
   IOpenSegment,
   ITable,
   ITextField,
@@ -135,9 +134,6 @@ export default async function main(
         );
         uiBuilder.hideLoading();
       }
-
-      // uiBuilder.hideLoading();
-      // uiBuilder.message.success(t("formatting_completed"));
     }
   );
 }
@@ -230,33 +226,6 @@ function isMainlyChinese(text: string): boolean {
 
   return chineseCharCount > nonChineseCharCount;
 }
-
-// function needsFormatting(recordId: string, fieldId: string, text: string,recordsMap: Map<string, string>): boolean {
-//   const formattedText = recordsMap.get(`${recordId}-${fieldId}`);
-//   return formattedText !== undefined && formattedText !== text;
-// }
-
-// async function displayRecordsAsTable(
-//   recordsMap: Map<string, { originalText: string; formattedText: string }>,
-//   uiBuilder: UIBuilder,
-//   t: Function // 将 t 函数作为参数添加
-// ) {
-//   // 检查记录是否为空
-//   if (recordsMap.size === 0) {
-//     uiBuilder.markdown(t("no_records_found")); // 使用传入的 t 函数进行国际化
-//     return;
-//   }
-
-//   let markdownTable = `| **${t("table_original_content")}** | **${t(
-//     "table_formatted_content"
-//   )}** |\n| --- | --- |\n`;
-
-//   for (const [key, { originalText, formattedText }] of recordsMap.entries()) {
-//     markdownTable += `| ${originalText} | ${formattedText} |\n`;
-//   }
-
-//   uiBuilder.markdown(markdownTable);
-// }
 
 async function displayRecordsAsTable(
   recordsMap: Map<string, { originalText: string; formattedText: string }>,
