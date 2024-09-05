@@ -21,7 +21,7 @@
     "vite": "^3.0.4"
   },
   "dependencies": {
-    "@lark-base-open/js-sdk": "^0.3.2",
+    "@lark-base-open/js-sdk": "^0.4.0",
     "i18next": "^23.5.1",
     "i18next-browser-languagedetector": "^7.1.0",
     "moment-timezone": "^0.5.43",
